@@ -2,6 +2,7 @@ import socket
 import tkinter as tk
 from tkinter import Scrollbar, messagebox, Listbox
 from PIL import Image, ImageTk
+from tkinter import font
 import os
 import socket
 import threading
@@ -94,7 +95,8 @@ class ClientWindow(tk.Frame):
         self.PORT = 7500
         self.BUFSIZE = 4096
         self.hostname = socket.gethostname()
-        self.SERVERIP = socket.gethostbyname(self.hostname)
+        # self.SERVERIP = socket.gethostbyname(self.hostname)
+        self.SERVERIP = f"{user_data}"
         
         self.clist = []
         self.cdict = {}
@@ -164,7 +166,7 @@ class ClientWindow(tk.Frame):
                 break
 
             # Display the message received from the server in the listbox
-            self.receive_message(f"Server: {data.decode('utf-8')}")
+            self.receive_message(f"User: {data.decode('utf-8')}")
         
         client.close()
 
@@ -233,7 +235,6 @@ class ServerWindow(tk.Frame):
         self.start_server_thread()
 
     def client_handler(self, client, addr):
-        """Handles communication with a single client."""
         try:
             while True:
                 data = client.recv(self.BUFSIZE)
@@ -265,7 +266,6 @@ class ServerWindow(tk.Frame):
             if client != sender_client:
                 try:
                     client.sendall(message.encode('utf-8'))
-                    self.send_message()
                 except:
                     self.remove_client(client)
 
@@ -303,7 +303,8 @@ class ServerWindow(tk.Frame):
         """Handle the send button click and display the message in the listbox."""
         message = self.entry.get()  # Get the text from the entry
         if message:
-            self.my_listbox.insert(tk.END, message)  # Add the message to the listbox
+            self.receive_message(f"You: {message}")
+            self.broadcast(message,self.clist)
             self.entry.delete(0, tk.END)  # Clear the entry after sending the message
         else:
             messagebox.showwarning("Input Error", "Please enter some text.")
